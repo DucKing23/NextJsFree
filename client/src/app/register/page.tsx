@@ -1,13 +1,15 @@
-import { ModeToggle } from "@/components/mode-toggle";
+import RegisterForm from "@/app/register/register-form";
 import React from "react";
 
-const RegisterPage = () => {
+function RegisterPage() {
   return (
     <div>
-      <ModeToggle />
-      Register Page aaa
+      <h1 className="text-xl font-semibold text-center mt-12">Đăng ký</h1>
+      <div className="flex justify-center">
+        <RegisterForm />
+      </div>
     </div>
   );
-};
+}
 
 export default RegisterPage;

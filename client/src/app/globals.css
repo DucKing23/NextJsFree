@@ -120,11 +120,7 @@
     @apply bg-background text-foreground;
   }
 }
-
-li {
-  @apply text-red-500;
-}
-
+/* 
 @layer utilities {
   .roboto-all {
     font-family: "Roboto", sans-serif;
@@ -133,4 +129,4 @@ li {
     font-style: normal;
     font-variation-settings: "wdth" 100;
   }
-}
+} */
