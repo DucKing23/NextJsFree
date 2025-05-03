@@ -50,7 +50,6 @@ const LoginForm = () => {
         }
       ).then(async (res) => {
         const payload = await res.json();
-        console.log(res);
         const data = {
           status: res.status,
           payload,
@@ -74,7 +73,6 @@ const LoginForm = () => {
         body: JSON.stringify(result),
       }).then(async (res) => {
         const payload = await res.json();
-        console.log(res);
         const data = {
           status: res.status,
           payload,
@@ -84,7 +82,7 @@ const LoginForm = () => {
         }
         return data;
       });
-
+      console.log(resultFormNextServer);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errors = error.payload.errors as {
