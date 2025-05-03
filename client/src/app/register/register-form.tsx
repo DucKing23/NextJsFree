@@ -20,18 +20,17 @@ import {
   RegisterBodyType,
 } from "@/schemaValidations/auth.schema";
 import envConfig from "@/config";
-import { headers } from "next/headers";
 
-const formSchema = z.object({
-  username: z.string().min(2).max(50),
-});
+// const formSchema = z.object({
+//   username: z.string().min(2).max(50),
+// });
 
 const RegisterForm = () => {
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
     defaultValues: {
-      name: "",
       email: "",
+      name: "",
       password: "",
       confirmPassword: "",
     },
@@ -39,7 +38,7 @@ const RegisterForm = () => {
 
   async function onSubmit(values: RegisterBodyType) {
     const result = await fetch(
-      `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/register`,
+      `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,
       {
         body: JSON.stringify(values),
         headers: {
