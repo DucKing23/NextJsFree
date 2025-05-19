@@ -24,11 +24,13 @@ import {
 import envConfig from "@/config";
 import { title } from "process";
 import { toast } from "sonner";
+import { useAppContext } from "@/app/AppProvider";
 const formSchema = z.object({
   username: z.string().min(2).max(50),
 });
 
 const LoginForm = () => {
+  const { setSessionToken } = useAppContext();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -82,7 +84,7 @@ const LoginForm = () => {
         }
         return data;
       });
-      console.log(resultFormNextServer);
+      setSessionToken(resultFormNextServer.payload.data.token);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errors = error.payload.errors as {

@@ -4,8 +4,7 @@ import { cookies } from "next/headers";
 
 export default async function MeProfile() {
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("theme");
-  console.log(sessionToken);
+  const sessionToken = cookieStore.get("sessionToken");
   const result = await fetch(
     `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/account/me`,
     {
@@ -25,6 +24,5 @@ export default async function MeProfile() {
     }
     return data;
   });
-  console.log(result);
-  return <div>me do</div>;
+  return <div>Name la: {result.payload.data.name} </div>;
 }
