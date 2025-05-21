@@ -3,7 +3,6 @@
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,13 +18,16 @@ import {
   RegisterBody,
   RegisterBodyType,
 } from "@/schemaValidations/auth.schema";
-import envConfig from "@/config";
+import authApiRequest from "@/apiRequest/auth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // const formSchema = z.object({
 //   username: z.string().min(2).max(50),
 // });
 
 const RegisterForm = () => {
+  const router = useRouter();
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
     defaultValues: {
@@ -37,16 +39,36 @@ const RegisterForm = () => {
   });
 
   async function onSubmit(values: RegisterBodyType) {
-    const result = await fetch(
-      `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,
-      {
-        body: JSON.stringify(values),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
+    try {
+      const result = await authApiRequest.register(values);
+
+      toast("Đã đăng ký thành công", {
+        description: result.payload.message,
+      });
+
+      // neu dang nhap thanh cong thi goi toi server
+      await authApiRequest.auth({ sessionToken: result.payload.data.token });
+      router.push("/me");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const errors = error.payload.errors as {
+        field: string;
+        message: string;
+      }[];
+      const status = error.status as number;
+      if (status === 422) {
+        errors.forEach((error) => {
+          form.setError(error.field as "email" | "password", {
+            type: "server",
+            message: error.message,
+          });
+        });
+      } else {
+        toast("Lỗi", {
+          description: error.payload.message,
+        });
       }
-    ).then((res) => res.json());
+    }
   }
   return (
     <Form {...form}>

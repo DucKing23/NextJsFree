@@ -24,13 +24,14 @@ import {
 import envConfig from "@/config";
 import { title } from "process";
 import { toast } from "sonner";
-import { useAppContext } from "@/app/AppProvider";
+import authApiRequest from "@/apiRequest/auth";
+import { useRouter } from "next/navigation";
 const formSchema = z.object({
   username: z.string().min(2).max(50),
 });
 
 const LoginForm = () => {
-  const { setSessionToken } = useAppContext();
+  const router = useRouter();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -41,50 +42,15 @@ const LoginForm = () => {
 
   async function onSubmit(values: LoginBodyType) {
     try {
-      const result = await fetch(
-        `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/login`,
-        {
-          body: JSON.stringify(values),
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-        }
-      ).then(async (res) => {
-        const payload = await res.json();
-        const data = {
-          status: res.status,
-          payload,
-        };
-        if (!res.ok) {
-          throw data;
-        }
-        return data;
-      });
+      const result = await authApiRequest.login(values);
 
       toast("Đã đăng nhập thành công", {
         description: result.payload.message,
       });
 
       // neu dang nhap thanh cong thi goi toi server
-      const resultFormNextServer = await fetch("/api/auth", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(result),
-      }).then(async (res) => {
-        const payload = await res.json();
-        const data = {
-          status: res.status,
-          payload,
-        };
-        if (!res.ok) {
-          throw data;
-        }
-        return data;
-      });
-      setSessionToken(resultFormNextServer.payload.data.token);
+      await authApiRequest.auth({ sessionToken: result.payload.data.token });
+      router.push("/me");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errors = error.payload.errors as {

@@ -1,6 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React from "react";
+import accountApiRequest from "@/apiRequest/account";
+import { clientsessionToken } from "@/lib/http";
+import React, { useEffect } from "react";
 
 export default function Profile() {
-  return <div></div>;
+  useEffect(() => {
+    const fetchRequest = async () => {
+      const result = await accountApiRequest.meClient();
+    };
+    fetchRequest();
+  }, []);
+  return <div>profile</div>;
 }
