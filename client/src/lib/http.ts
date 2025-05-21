@@ -4,14 +4,30 @@ import envConfig from "@/config";
 import { LoginResType } from "@/schemaValidations/auth.schema";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+///
 type CustomOptions = RequestInit & {
   baseUrl?: string | undefined;
 };
 
+// xu ly error
+const ENTITY_ERROR_STATUS = 422;
+
+type EntityErrorPayload = {
+  message: string;
+  errors: {
+    field: string;
+    message: string;
+  }[];
+};
+
 // nen su dung object nhu vay de co cac thuoc tinh
-class HttpError extends Error {
+export class HttpError extends Error {
   status: number;
-  payload: any;
+  payload: {
+    message: string;
+    [key: string]: any;
+  };
   constructor({ status, payload }: { status: number; payload: any }) {
     super("Http Error");
     this.status = status;
@@ -19,6 +35,24 @@ class HttpError extends Error {
   }
 }
 
+export class EntityError extends HttpError {
+  status: 422;
+  payload: EntityErrorPayload;
+
+  constructor({
+    status,
+    payload,
+  }: {
+    status: 422;
+    payload: EntityErrorPayload;
+  }) {
+    super({ status, payload });
+    this.status = status;
+    this.payload = payload;
+  }
+}
+
+// tao sessionToken o client
 class SessionToken {
   private token = "";
 
@@ -37,6 +71,7 @@ class SessionToken {
 
 export const clientsessionToken = new SessionToken();
 
+//http
 const request = async <Response>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   url: string,
@@ -79,7 +114,17 @@ const request = async <Response>(
     payload,
   };
   if (!res.ok) {
-    throw new HttpError(data);
+    //error
+    if (res.status === ENTITY_ERROR_STATUS) {
+      throw new EntityError(
+        data as {
+          status: 422;
+          payload: EntityErrorPayload;
+        }
+      );
+    } else {
+      throw new HttpError(data);
+    }
   }
 
   if (["auth/login", "/auth/login"].includes(url)) {

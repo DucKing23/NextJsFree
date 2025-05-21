@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -21,12 +21,15 @@ import {
 import authApiRequest from "@/apiRequest/auth";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { handleErrorApi } from "@/lib/utils";
 
 // const formSchema = z.object({
 //   username: z.string().min(2).max(50),
 // });
 
 const RegisterForm = () => {
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
@@ -39,6 +42,8 @@ const RegisterForm = () => {
   });
 
   async function onSubmit(values: RegisterBodyType) {
+    if (loading) return;
+    setLoading(true);
     try {
       const result = await authApiRequest.register(values);
 
@@ -51,23 +56,9 @@ const RegisterForm = () => {
       router.push("/me");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      const errors = error.payload.errors as {
-        field: string;
-        message: string;
-      }[];
-      const status = error.status as number;
-      if (status === 422) {
-        errors.forEach((error) => {
-          form.setError(error.field as "email" | "password", {
-            type: "server",
-            message: error.message,
-          });
-        });
-      } else {
-        toast("Lỗi", {
-          description: error.payload.message,
-        });
-      }
+      handleErrorApi({ error, setError: form.setError });
+    } finally {
+      setLoading(false);
     }
   }
   return (
